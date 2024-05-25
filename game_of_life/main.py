@@ -51,7 +51,7 @@ def next_board_state(initial_state):
     next_state = []
     height, width = len(initial_state)+2, len(initial_state[0])+2
 
-    # Creating a boarder for the initial state board
+    # Creating a border for the initial state board
     initial_state = [list('@'*width)] + initial_state + [list('@'*width)]
     for i in range(1, height-1):
         initial_state[i] = ['@'] + initial_state[i] + ['@']
