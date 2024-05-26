@@ -1,10 +1,13 @@
 from PIL import Image
+from colorama import init
 
+init()
 
 CHARS = "`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
 
 def load_image(path):
-    img = Image.open(path)
+    # Risize so that image would fit the terminal
+    img = Image.open(path).resize((631, 533))
     width, height = img.size[0], img.size[1]
     pixels = img.load()
     pixel_list = []
@@ -13,14 +16,14 @@ def load_image(path):
     img.close()
     return pixel_list
 
-def brightness_matrix(pixels):
+def brightness_matrix(pixels, mode=lambda R,G,B: (R+G+B)/3):
     height, width = len(pixels), len(pixels[0])
     matrix = []
     for i in range(height):
         new_row = []
         for j in range(width):
-            r, g, b = pixels[i][j][0], pixels[i][j][1], pixels[i][j][2]
-            new_row.append((r+g+b)//3)
+            R, G, B = pixels[i][j][0], pixels[i][j][1], pixels[i][j][2]
+            new_row.append(round(mode(R,G,B)))
         matrix.append(new_row)
     return matrix
 
@@ -38,18 +41,23 @@ def to_ascii(matrix):
 
 def draw(matrix):
     for i in range(len(matrix)):
+        # Add "'\033[32m' + " to print to change the colour of the output
         print(''.join(matrix[i]))
 
+def invert_brightness(matrix):
+    height, width = len(matrix), len(matrix[0])
+    for i in range(height):
+        for j in range(width):
+            matrix[i][j] = abs(matrix[i][j] - 255)
+
+
+# Modes for the brightness_matrix
+min_max = lambda R,G,B: (max(R, G, B) + min(R, G, B)) / 2
+luminosity = lambda R,G,B: 0.21*R + 0.72*G + 0.07*B
 
 pixels = load_image("ascii-pineapple.jpg")
-# print(pixels)
-
-matrix = brightness_matrix(pixels)
-# print(matrix)
-
+matrix = brightness_matrix(pixels, luminosity)
+# invert_brightness(matrix)
 image = to_ascii(matrix)
-# print(image)
 
 draw(image)
-# print("Successfully loaded image!")
-# print(f"Image size: {(img.size)[0]} x {(img.size)[1]}")
